@@ -1,0 +1,40 @@
+.container {
+  margin-bottom: 1rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.tagsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tagBtn {
+  padding: 0.45rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tagBtn:hover {
+  border-color: var(--color-primary);
+}
+
+.selectedTag {
+  border-color: var(--color-primary);
+  background: rgba(255, 122, 89, 0.15);
+  color: var(--color-primary);
+  font-weight: 700;
+}

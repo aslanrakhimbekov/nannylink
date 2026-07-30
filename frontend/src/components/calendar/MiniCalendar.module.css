@@ -1,0 +1,104 @@
+.calendarWrapper {
+  margin-bottom: 1.5rem;
+}
+
+/* Override react-calendar default styles for warm theme */
+.calendarWrapper :global(.react-calendar) {
+  width: 100%;
+  max-width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  font-family: inherit;
+  padding: 0.75rem;
+  color: var(--text-primary);
+}
+
+.calendarWrapper :global(.react-calendar__navigation) {
+  margin-bottom: 0.5rem;
+}
+
+.calendarWrapper :global(.react-calendar__navigation button) {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 10px;
+  min-width: 36px;
+  cursor: pointer;
+}
+
+.calendarWrapper :global(.react-calendar__navigation button:hover) {
+  background: var(--hover-bg);
+}
+
+.calendarWrapper :global(.react-calendar__navigation button:disabled) {
+  opacity: 0.3;
+}
+
+.calendarWrapper :global(.react-calendar__month-view__weekdays) {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.calendarWrapper :global(.react-calendar__month-view__weekdays abbr) {
+  text-decoration: none;
+}
+
+.calendarWrapper :global(.react-calendar__tile) {
+  padding: 0.65rem 0.5rem;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  border-radius: 10px;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.calendarWrapper :global(.react-calendar__tile:hover) {
+  background: var(--hover-bg);
+}
+
+.calendarWrapper :global(.react-calendar__tile:disabled) {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.calendarWrapper :global(.react-calendar__tile--now) {
+  background: rgba(255, 152, 112, 0.12);
+  font-weight: 700;
+}
+
+.calendarWrapper :global(.react-calendar__tile--active) {
+  background: var(--primary-color) !important;
+  color: white !important;
+  font-weight: 700;
+}
+
+/* Green dot indicator for days with available slots */
+.highlightedDay {
+  position: relative;
+}
+
+.highlightedDay::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+.calendarWrapper :global(.react-calendar__month-view__days__day--neighboringMonth) {
+  opacity: 0.3;
+}

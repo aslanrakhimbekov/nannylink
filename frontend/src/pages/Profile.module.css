@@ -1,0 +1,72 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.header h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.phoneLabel {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.statusCard {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.verified {
+  border-color: rgba(0, 184, 148, 0.3);
+  background: rgba(0, 184, 148, 0.06);
+}
+
+.unverified {
+  border-color: rgba(253, 203, 110, 0.3);
+  background: rgba(253, 203, 110, 0.06);
+}
+
+.verifiedIcon {
+  color: var(--color-success);
+  filter: drop-shadow(0 0 8px rgba(0, 184, 148, 0.3));
+}
+
+.unverifiedIcon {
+  color: var(--color-warning);
+  filter: drop-shadow(0 0 8px rgba(253, 203, 110, 0.3));
+}
+
+.statusCard h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.statusCard p {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}

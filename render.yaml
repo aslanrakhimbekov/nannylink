@@ -1,0 +1,62 @@
+services:
+  # 1. Backend Web Service (Laravel Docker)
+  - type: web
+    name: nannylink-backend
+    env: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    region: singapore
+    envVars:
+      - key: APP_NAME
+        value: NannyLink
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: nannylink-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: nannylink-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: nannylink-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: nannylink-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: nannylink-db
+          property: password
+
+  # 2. Frontend Static Site (React Vite)
+  - type: web
+    name: nannylink-frontend
+    env: static
+    plan: free
+    region: singapore
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: nannylink-backend
+          property: url
+
+databases:
+  # 3. PostgreSQL Database
+  - name: nannylink-db
+    databaseName: nannylink
+    user: nannylink_user
+    plan: free
+    region: singapore

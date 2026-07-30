@@ -1,0 +1,133 @@
+.wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.authCard {
+  width: 100%;
+  padding: 30px 24px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--color-text);
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  position: relative;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--color-border);
+  z-index: 1;
+}
+
+.divider span {
+  background-color: var(--color-bg);
+  padding: 0 12px;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  z-index: 2;
+  font-weight: 600;
+}
+
+.telegramContainer {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.countdownContainer {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.timer {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.resendBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-primary-light);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.resendBtn:hover {
+  opacity: 0.8;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 12px;
+}
+
+.backLink {
+  font-size: 0.85rem;
+  color: var(--color-primary);
+  cursor: pointer;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.backLink:hover {
+  color: var(--color-primary-dark);
+}
+
+.telegramMockBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  background-color: #54a9eb;
+  color: white;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  font-size: 0.9rem;
+  gap: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.telegramMockBtn:hover {
+  background-color: #4b9cdb;
+}
+
+.telegramIcon {
+  flex-shrink: 0;
+}

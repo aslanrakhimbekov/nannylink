@@ -1,0 +1,71 @@
+.chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+  border-radius: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  border-color: var(--primary-color);
+  background: rgba(255, 152, 112, 0.06);
+}
+
+.selected {
+  border-color: var(--primary-color);
+  background: rgba(255, 152, 112, 0.1);
+  box-shadow: 0 0 0 2px rgba(255, 152, 112, 0.2);
+}
+
+.booked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.timeRange {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.dot {
+  font-size: 0.7rem;
+}
+
+.time {
+  color: var(--text-primary);
+}
+
+.duration {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+}
+
+.deleteBtn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.deleteBtn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}

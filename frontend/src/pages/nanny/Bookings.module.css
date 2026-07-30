@@ -1,0 +1,115 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bookingCard {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 1.5rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.statusBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+}
+
+.pending {
+  background: rgba(251, 146, 60, 0.15);
+  color: #fb923c;
+}
+
+.confirmed {
+  background: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
+}
+
+.rejected {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+}
+
+.cancelled {
+  background: rgba(156, 163, 175, 0.15);
+  color: #9ca3af;
+}
+
+.completed {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.item strong {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.contacts {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.contacts h4 {
+  margin-bottom: 0.5rem;
+  color: #4ade80;
+  font-size: 0.9rem;
+}
+
+.contacts p {
+  margin: 0.25rem 0;
+  font-size: 0.85rem;
+}
+
+.contacts a {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.btn {
+  flex: 1;
+}
+
+.cancelComment {
+  padding: 0.75rem 1rem;
+  background: rgba(239, 68, 68, 0.05);
+  border-radius: 10px;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}

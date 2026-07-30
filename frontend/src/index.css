@@ -1,0 +1,219 @@
+@import 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+
+/* Modern Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  font-family: 'Inter', sans-serif;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  overflow-x: hidden;
+  transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+/* Global Variables / Tokens */
+:root {
+  --color-primary: #FF7A59;        /* Warm Coral/Peach */
+  --color-primary-light: #FF9E79;  /* Soft Warm Peach */
+  --color-primary-dark: #E05F3E;   /* Terracotta Honey */
+  --color-accent: #FFAE34;         /* Soft Honey */
+  --color-success: #2ECC71;
+  --color-warning: #F39C12;
+  --color-danger: #FF7675;
+
+  /* Default Warm Light Theme Variable Values */
+  --color-bg: #FFFDFB;             /* Warm Cream Linen */
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #FFF7F2;
+  --color-border: #F3E3D3;
+  --color-text: #3D2D26;           /* Cocoa Dark Coffee */
+  --color-text-muted: #8E7B72;     /* Latte Muted */
+  --color-card-glow: rgba(255, 122, 89, 0.12);
+
+  --shadow-sm: 0 2px 8px rgba(224, 95, 62, 0.05);
+  --shadow-md: 0 8px 24px rgba(224, 95, 62, 0.08);
+  --shadow-lg: 0 16px 48px rgba(224, 95, 62, 0.12);
+
+  --border-radius-sm: 8px;
+  --border-radius-md: 16px;
+  --border-radius-lg: 24px;
+  --border-radius-xl: 32px;
+
+  --transition-speed: 0.3s;
+  --transition-cubic: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Optional Warm Dark Chocolate Theme */
+[data-theme='dark'] {
+  --color-bg: #1B120F;             /* Dark Cocoa */
+  --color-surface: rgba(255, 255, 255, 0.04);
+  --color-surface-hover: rgba(255, 255, 255, 0.08);
+  --color-border: rgba(255, 255, 255, 0.07);
+  --color-text: #FCECE6;           /* Warm Ivory */
+  --color-text-muted: #B39E96;     /* Cream Brown */
+  --color-card-glow: rgba(255, 122, 89, 0.2);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+/* Base Form Controls */
+input, textarea, select {
+  font-family: inherit;
+  font-size: 1rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--border-radius-sm);
+  padding: 12px 16px;
+  width: 100%;
+  outline: none;
+  transition: all var(--transition-speed) var(--transition-cubic);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+  background-color: var(--color-surface-hover);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-weight: 600;
+  transition: all var(--transition-speed) var(--transition-cubic);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* Selection */
+::selection {
+  background-color: var(--color-primary);
+  color: #FFF;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Global Classes & Utilities */
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+}
+
+.glass {
+  background: var(--color-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--border-radius-md);
+  transition: transform var(--transition-speed) var(--transition-cubic), box-shadow var(--transition-speed) var(--transition-cubic);
+}
+
+.clickable-card {
+  cursor: pointer;
+}
+
+.clickable-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px var(--color-card-glow);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: white;
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.slide-up {
+  animation: slideUp 0.5s var(--transition-cubic) forwards;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--color-surface) 25%, var(--color-surface-hover) 50%, var(--color-surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: var(--border-radius-sm);
+}
+
+/* Map override styles */
+.leaflet-container {
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  z-index: 10;
+}
