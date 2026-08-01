@@ -44,12 +44,15 @@ RUN mkdir -p storage/app/public/documents \
     storage/framework/views \
     bootstrap/cache
 
+# Publish Filament assets
+RUN php artisan filament:assets || true
+
 # Set permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/public
 
 # Create startup script
-RUN printf '#!/bin/bash\nphp artisan config:clear\nphp artisan storage:link || true\nphp artisan filament:upgrade --no-interaction || true\nphp artisan migrate --force\nphp artisan db:seed --force\nphp-fpm -D\nnginx -g "daemon off;"\n' > /start.sh && chmod +x /start.sh
+RUN printf '#!/bin/bash\nphp artisan config:clear\nphp artisan storage:link || true\nphp artisan filament:assets || true\nphp artisan migrate --force\nphp artisan db:seed --force\nphp-fpm -D\nnginx -g "daemon off;"\n' > /start.sh && chmod +x /start.sh
 
 EXPOSE 80
 
