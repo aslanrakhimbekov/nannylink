@@ -8,6 +8,7 @@ use App\Enums\UserRole;
 use App\Enums\DocumentStatus;
 use App\Jobs\ProcessDocumentJob;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,9 +17,10 @@ class DocumentController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
+        $userRole = is_object($user->role) ? $user->role->value : (string) $user->role;
 
         // 1. Authorize: role check (must be nanny)
-        if ($user->role !== UserRole::NANNY) {
+        if ($userRole !== 'nanny') {
             return response()->json([
                 'message' => 'This action is unauthorized.'
             ], 403);

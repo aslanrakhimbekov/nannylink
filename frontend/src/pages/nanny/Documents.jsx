@@ -93,13 +93,19 @@ export default function Documents() {
 
     setUploadingType(type);
     try {
-      await documentsApi.uploadDocument(type, file);
+      const resDoc = await documentsApi.uploadDocument(type, file);
       showToast('success', 'Документ успешно загружен на проверку!');
       setSelectedFiles((prev) => {
         const copy = { ...prev };
         delete copy[type];
         return copy;
       });
+      if (resDoc && resDoc.type) {
+        setDocuments((prev) => {
+          const filtered = prev.filter((d) => d.type !== type);
+          return [...filtered, resDoc];
+        });
+      }
       await refreshProfile();
     } catch (err) {
       showToast('error', err.message || 'Ошибка при загрузке документа');
