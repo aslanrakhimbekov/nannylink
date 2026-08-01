@@ -33,6 +33,8 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     protected $fillable = [
         'phone',
+        'email',
+        'password',
         'telegram_id',
         'telegram_username',
         'role',
@@ -40,11 +42,17 @@ class User extends Authenticatable implements FilamentUser, HasName
         'language',
     ];
 
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
     protected function casts(): array
     {
         return [
             'role' => UserRole::class,
             'status' => UserStatus::class,
+            'password' => 'hashed',
         ];
     }
 

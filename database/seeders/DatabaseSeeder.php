@@ -213,9 +213,11 @@ class DatabaseSeeder extends Seeder
         ];
 
         // 3. Admin User
-        $admin = User::firstOrCreate(
+        $admin = User::updateOrCreate(
             ['phone' => '+77014444444'],
             [
+                'email' => 'aslan.rakhimbekov@gmail.com',
+                'password' => \Illuminate\Support\Facades\Hash::make('Admin2026!'),
                 'role' => UserRole::ADMIN,
                 'status' => UserStatus::ACTIVE,
                 'language' => UserLanguage::RU,

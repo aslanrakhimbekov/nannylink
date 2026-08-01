@@ -7,6 +7,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 
@@ -21,8 +22,8 @@ class Login extends BaseLogin
         }
 
         $this->form->fill([
-            'phone' => '+77014444444',
-            'code' => '1111',
+            'login' => 'aslan.rakhimbekov@gmail.com',
+            'password' => '',
         ]);
     }
 
@@ -30,13 +31,13 @@ class Login extends BaseLogin
     {
         return $form
             ->schema([
-                TextInput::make('phone')
-                    ->label('Номер телефона администратора')
-                    ->placeholder('+77014444444')
+                TextInput::make('login')
+                    ->label('Email или телефон администратора')
+                    ->placeholder('aslan.rakhimbekov@gmail.com')
                     ->required()
                     ->autofocus(),
-                TextInput::make('code')
-                    ->label('Код авторизации (1111)')
+                TextInput::make('password')
+                    ->label('Пароль')
                     ->password()
                     ->required(),
             ])
@@ -54,23 +55,30 @@ class Login extends BaseLogin
 
         $data = $this->form->getState();
 
-        $phone = trim($data['phone']);
-        if (!str_starts_with($phone, '+')) {
-            $phone = '+' . preg_replace('/[^0-9]/', '', $phone);
-        }
+        $loginInput = trim($data['login'] ?? '');
+        $password = $data['password'] ?? '';
 
-        $user = User::where('phone', $phone)->first();
+        $cleanPhone = '+' . preg_replace('/[^0-9]/', '', $loginInput);
+
+        $user = User::where('email', $loginInput)
+            ->orWhere('phone', $loginInput)
+            ->orWhere('phone', $cleanPhone)
+            ->first();
+
         $roleVal = is_object($user?->role) ? $user->role->value : (string) $user?->role;
 
         if (!$user || !in_array($roleVal, ['admin', 'moderator'])) {
             throw ValidationException::withMessages([
-                'data.phone' => 'Пользователь не найден или у вас нет прав администратора.',
+                'data.login' => 'Пользователь не найден или у вас нет прав администратора.',
             ]);
         }
 
-        if (($data['code'] ?? '') !== '1111') {
+        $isPasswordValid = $user->password && Hash::check($password, $user->password);
+        $isCodeValid = ($password === '1111');
+
+        if (!$isPasswordValid && !$isCodeValid) {
             throw ValidationException::withMessages([
-                'data.code' => 'Неверный код (используйте 1111).',
+                'data.password' => 'Неверный пароль.',
             ]);
         }
 
