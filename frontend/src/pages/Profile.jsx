@@ -275,31 +275,26 @@ export default function Profile() {
 
                 <div style={{ marginTop: '1rem' }}>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-text-muted)' }}>
-                    Специальные навыки
+                    {t('skills.title')}
                   </label>
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    {[
-                      { code: 'first_aid', label: '🚨 Первая помощь (CPR)' },
-                      { code: 'infants', label: '👶 Груднички' },
-                      { code: 'lessons', label: '📚 Помощь с уроками' },
-                      { code: 'montessori', label: '🧩 Монтессори' },
-                    ].map((sk) => (
+                    {['first_aid', 'infants', 'lessons', 'montessori'].map((code) => (
                       <button
-                        key={sk.code}
+                        key={code}
                         type="button"
-                        onClick={() => toggleSkill(sk.code)}
+                        onClick={() => toggleSkill(code)}
                         style={{
                           padding: '0.4rem 0.75rem',
                           borderRadius: '20px',
                           fontSize: '0.8rem',
-                          border: '1px solid ' + (skills.includes(sk.code) ? 'var(--color-primary)' : 'var(--color-border)'),
-                          background: skills.includes(sk.code) ? 'rgba(255,122,89,0.15)' : 'var(--color-surface)',
-                          color: skills.includes(sk.code) ? 'var(--color-primary)' : 'var(--color-text)',
-                          fontWeight: skills.includes(sk.code) ? '700' : '500',
+                          border: '1px solid ' + (skills.includes(code) ? 'var(--color-primary)' : 'var(--color-border)'),
+                          background: skills.includes(code) ? 'rgba(255,122,89,0.15)' : 'var(--color-surface)',
+                          color: skills.includes(code) ? 'var(--color-primary)' : 'var(--color-text)',
+                          fontWeight: skills.includes(code) ? '700' : '500',
                           cursor: 'pointer',
                         }}
                       >
-                        {sk.label}
+                        {t(`skills.${code}`)}
                       </button>
                     ))}
                   </div>

@@ -155,21 +155,11 @@ export default function Search() {
 
                 {nanny.compliments_summary && Object.keys(nanny.compliments_summary).length > 0 && (
                   <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '6px' }}>
-                    {Object.entries(nanny.compliments_summary).slice(0, 2).map(([tag, count]) => {
-                      const labelMap = {
-                        punctual: '⏰ Пунктуальная',
-                        finds_common_ground: '❤️ Находит подход',
-                        clean: '✨ Чистоплотная',
-                        active_games: '🎨 Игры',
-                        polite: '🤝 Вежливая',
-                        cooks: '🍳 Готовит',
-                      };
-                      return (
-                        <span key={tag} style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', background: 'rgba(255, 122, 89, 0.1)', color: 'var(--color-primary)', fontWeight: 600 }}>
-                          {labelMap[tag] || tag} ×{count}
-                        </span>
-                      );
-                    })}
+                    {Object.entries(nanny.compliments_summary).slice(0, 2).map(([tag, count]) => (
+                      <span key={tag} style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '10px', background: 'rgba(255, 122, 89, 0.1)', color: 'var(--color-primary)', fontWeight: 600 }}>
+                        {t(`compliments.${tag}`, tag)} ×{count}
+                      </span>
+                    ))}
                   </div>
                 )}
 
@@ -180,11 +170,11 @@ export default function Search() {
                 )}
 
                 <div className={styles.meta}>
-                  <span>{nanny.experience_years} {t('common.years')} {t('profile.experience').toLowerCase()}</span>
+                  <span>{nanny.experience_years} {t('profile.experience_years_label')}</span>
                   {nanny.is_new_nanny ? (
                     <span className={styles.rate} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.2 }}>
-                      <span style={{ textDecoration: 'line-through', opacity: 0.5, fontSize: '0.8rem', fontWeight: 500 }}>{nanny.original_hourly_rate || nanny.hourly_rate} ₸/час</span>
-                      <span style={{ color: '#10B981', fontWeight: 800 }}>{nanny.effective_hourly_rate} ₸/час</span>
+                      <span style={{ textDecoration: 'line-through', opacity: 0.5, fontSize: '0.8rem', fontWeight: 500 }}>{nanny.original_hourly_rate || nanny.hourly_rate} {t('common.per_hour')}</span>
+                      <span style={{ color: '#10B981', fontWeight: 800 }}>{nanny.effective_hourly_rate} {t('common.per_hour')}</span>
                     </span>
                   ) : (
                     <span className={styles.rate}>{nanny.hourly_rate} {t('common.per_hour')}</span>

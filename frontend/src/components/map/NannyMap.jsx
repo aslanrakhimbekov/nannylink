@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 
@@ -54,6 +55,7 @@ const createNannyAvatarIcon = (avatarUrl, firstName) => {
 };
 
 export default function NannyMap({ userLocation, radiusKm = 2, nannies = [], onNannyClick, onUserLocationChange, height = '300px' }) {
+  const { t } = useTranslation();
   const center = userLocation ? [userLocation.latitude, userLocation.longitude] : [43.238949, 76.889709];
   const markerRef = useRef(null);
 
@@ -136,7 +138,7 @@ export default function NannyMap({ userLocation, radiusKm = 2, nannies = [], onN
                       {nanny.first_name} {nanny.last_name}
                     </div>
                     <div style={{ color: '#FF7A59', fontWeight: '700', fontSize: '0.82rem' }}>
-                      {nanny.effective_hourly_rate || nanny.hourly_rate} ₸/час
+                      {nanny.effective_hourly_rate || nanny.hourly_rate} {t('common.per_hour')}
                     </div>
                   </div>
                 </div>

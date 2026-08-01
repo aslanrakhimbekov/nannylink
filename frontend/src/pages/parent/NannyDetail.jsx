@@ -233,11 +233,11 @@ export default function NannyDetail() {
               </div>
               {nannyProfile?.is_new_nanny ? (
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '4px' }}>
-                  <span style={{ textDecoration: 'line-through', opacity: 0.5, fontSize: '0.9rem' }}>{nannyProfile.original_hourly_rate || nannyProfile.hourly_rate} ₸/час</span>
-                  <span className={styles.rate} style={{ color: '#10B981', fontWeight: 800 }}>{nannyProfile.effective_hourly_rate} ₸/час</span>
+                  <span style={{ textDecoration: 'line-through', opacity: 0.5, fontSize: '0.9rem' }}>{nannyProfile.original_hourly_rate || nannyProfile.hourly_rate} {t('common.per_hour')}</span>
+                  <span className={styles.rate} style={{ color: '#10B981', fontWeight: 800 }}>{nannyProfile.effective_hourly_rate} {t('common.per_hour')}</span>
                 </div>
               ) : (
-                <span className={styles.rate}>{nannyProfile?.hourly_rate} ₸/час</span>
+                <span className={styles.rate}>{nannyProfile?.hourly_rate} {t('common.per_hour')}</span>
               )}
             </div>
           </div>
@@ -245,55 +245,37 @@ export default function NannyDetail() {
           {(i18n.language === 'kk' && nannyProfile?.bio_kk) ? nannyProfile.bio_kk : (nannyProfile?.bio || 'Сипаттамасы жоқ.')}
         </p>
         <div className={styles.experience}>
-          <strong>Опыт работы:</strong> {nannyProfile?.experience_years} {t('common.years')}
+          <strong>{t('profile.experience_years')}:</strong> {nannyProfile?.experience_years} {t('common.years')}
         </div>
 
         {nannyProfile?.languages && nannyProfile.languages.length > 0 && (
           <div style={{ marginTop: '0.5rem' }}>
-            <strong style={{ fontSize: '0.85rem' }}>Языки общения: </strong>
+            <strong style={{ fontSize: '0.85rem' }}>{t('filters.language')}: </strong>
             <span style={{ fontSize: '0.85rem' }}>
-              {nannyProfile.languages.map(l => l === 'kk' ? 'Казахский' : l === 'ru' ? 'Русский' : 'Английский').join(', ')}
+              {nannyProfile.languages.map(l => t(`languages_list.${l}`, l)).join(', ')}
             </span>
           </div>
         )}
 
         {nannyProfile?.skills && nannyProfile.skills.length > 0 && (
           <div style={{ marginTop: '0.5rem', display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-            {nannyProfile.skills.map(sk => {
-              const labelMap = {
-                first_aid: '🚨 Первая помощь (CPR)',
-                infants: '👶 Груднички',
-                lessons: '📚 Помощь с уроками',
-                montessori: '🧩 Монтессори',
-              };
-              return (
-                <span key={sk} style={{ fontSize: '0.75rem', padding: '3px 10px', borderRadius: '12px', background: 'rgba(255,122,89,0.12)', color: 'var(--color-primary)', fontWeight: 600 }}>
-                  {labelMap[sk] || sk}
-                </span>
-              );
-            })}
+            {nannyProfile.skills.map(sk => (
+              <span key={sk} style={{ fontSize: '0.75rem', padding: '3px 10px', borderRadius: '12px', background: 'rgba(255,122,89,0.12)', color: 'var(--color-primary)', fontWeight: 600 }}>
+                {t(`skills.${sk}`, sk)}
+              </span>
+            ))}
           </div>
         )}
 
         {nannyProfile?.compliments_summary && Object.keys(nannyProfile.compliments_summary).length > 0 && (
           <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--color-border)' }}>
-            <strong style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.35rem' }}>Достоинства по отзывам родителей:</strong>
+            <strong style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.35rem' }}>{t('compliments.title')}</strong>
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-              {Object.entries(nannyProfile.compliments_summary).map(([tag, count]) => {
-                const labelMap = {
-                  punctual: '⏰ Пунктуальная',
-                  finds_common_ground: '❤️ Находит подход',
-                  clean: '✨ Чистоплотная',
-                  active_games: '🎨 Игры',
-                  polite: '🤝 Вежливая',
-                  cooks: '🍳 Готовит',
-                };
-                return (
-                  <span key={tag} style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '14px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', fontWeight: 600 }}>
-                    {labelMap[tag] || tag} <strong style={{ color: 'var(--color-primary)' }}>×{count}</strong>
-                  </span>
-                );
-              })}
+              {Object.entries(nannyProfile.compliments_summary).map(([tag, count]) => (
+                <span key={tag} style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '14px', background: 'var(--color-surface)', border: '1px solid var(--color-border)', fontWeight: 600 }}>
+                  {t(`compliments.${tag}`, tag)} <strong style={{ color: 'var(--color-primary)' }}>×{count}</strong>
+                </span>
+              ))}
             </div>
           </div>
         )}
