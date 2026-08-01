@@ -48,31 +48,8 @@ class ProcessDocumentJob implements ShouldQueue
                 return;
             }
 
-            // Only attempt PDF parsing if smalot/pdfparser is available
-            if (class_exists(Parser::class)) {
-                try {
-                    $parser = resolve(Parser::class);
-                    $pdf = $parser->parseContent($content);
-                    $text = $pdf->getText();
-
-                    // Check if eGov validation link is present
-                    if (!empty($text) && !str_contains($text, 'results.egov.kz')) {
-                        $this->document->update([
-                            'status' => DocumentStatus::REJECTED,
-                            'rejection_reason' => 'QR verification link not found',
-                        ]);
-
-                        $user = $this->document->profile?->user;
-                        if ($user) {
-                            $user->notify(new DocumentStatusChangedNotification($this->document));
-                        }
-                    }
-                } catch (\Throwable $e) {
-                    \Illuminate\Support\Facades\Log::warning("PDF parse exception for doc {$this->document->id}: " . $e->getMessage());
-                }
-            }
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error("ProcessDocumentJob error for doc {$this->document->id}: " . $e->getMessage());
-        }
+            // Optional background indexing or parsing can be done here.
+            // Automatic rejection disabled to allow human admin moderation.
+            return;
     }
 }
