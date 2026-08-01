@@ -3,86 +3,42 @@
 namespace App\Filament\Pages\Auth;
 
 use Filament\Pages\Auth\Login as BaseLogin;
+use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Form;
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
-use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 
 class Login extends BaseLogin
 {
-    public ?array $data = [];
-
-    public function mount(): void
+    protected function getForms(): array
     {
-        if (Auth::check()) {
-            redirect()->intended(filament()->getUrl());
-        }
-
-        $this->form->fill([
-            'email' => 'aslan.rakhimbekov@gmail.com',
-            'password' => '',
-        ]);
+        return [
+            'form' => $this->form(
+                $this->makeForm()
+                    ->schema([
+                        $this->getEmailFormComponent(),
+                        $this->getPasswordFormComponent(),
+                        $this->getRememberFormComponent(),
+                    ])
+                    ->statePath('data'),
+            ),
+        ];
     }
 
-    public function form(Form $form): Form
+    protected function getEmailFormComponent(): Component
     {
-        return $form
-            ->schema([
-                TextInput::make('email')
-                    ->label('Email администратора')
-                    ->email()
-                    ->placeholder('aslan.rakhimbekov@gmail.com')
-                    ->required()
-                    ->autofocus(),
-                TextInput::make('password')
-                    ->label('Пароль')
-                    ->password()
-                    ->hintAction(
-                        Action::make('forgotPassword')
-                            ->label('Забыли пароль?')
-                            ->url(fn () => filament()->getRequestPasswordResetUrl())
-                    )
-                    ->required(),
-            ])
-            ->statePath('data');
+        return TextInput::make('email')
+            ->label('Email администратора')
+            ->email()
+            ->placeholder('aslan.rakhimbekov@gmail.com')
+            ->required()
+            ->autocomplete()
+            ->autofocus();
     }
 
-    public function authenticate(): ?\Filament\Http\Responses\Auth\Contracts\LoginResponse
+    protected function getCredentialsFromFormData(array $data): array
     {
-        try {
-            $this->rateLimit(5);
-        } catch (TooManyRequestsException $exception) {
-            $this->getRateLimitedNotification($exception)?->send();
-            return null;
-        }
-
-        $data = $this->form->getState();
-
-        $email = trim(strtolower($data['email'] ?? ''));
-        $password = $data['password'] ?? '';
-
-        $user = User::where('email', $email)->first();
-
-        $roleVal = is_object($user?->role) ? $user->role->value : (string) $user?->role;
-
-        if (!$user || !in_array($roleVal, ['admin', 'moderator'])) {
-            throw ValidationException::withMessages([
-                'data.email' => 'Администратор с таким Email не найден или недостаточно прав.',
-            ]);
-        }
-
-        if (!$user->password || !Hash::check($password, $user->password)) {
-            throw ValidationException::withMessages([
-                'data.password' => 'Неверный пароль.',
-            ]);
-        }
-
-        Auth::login($user, true);
-
-        return app(\Filament\Http\Responses\Auth\Contracts\LoginResponse::class);
+        return [
+            'email' => trim(strtolower($data['email'] ?? '')),
+            'password' => $data['password'] ?? '',
+        ];
     }
 }

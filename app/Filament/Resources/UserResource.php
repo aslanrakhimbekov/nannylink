@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Models\User;
+use App\Models\Profile;
 use App\Enums\UserStatus;
 use App\Filament\Resources\UserResource\Pages;
 use Filament\Resources\Resource;
@@ -63,8 +64,7 @@ class UserResource extends Resource
                             ->nullable(),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Персональные данные (Профиль)')
-                    ->relationship('profile')
+                Forms\Components\Section::make('Персональные данные (ФИО)')
                     ->schema([
                         Forms\Components\TextInput::make('first_name')
                             ->label('Имя')
@@ -93,15 +93,19 @@ class UserResource extends Resource
                     ->sortable()
                     ->default('—'),
 
-                Tables\Columns\TextColumn::make('profile.first_name')
+                Tables\Columns\TextColumn::make('first_name')
                     ->label('Имя')
-                    ->searchable()
-                    ->default('—'),
+                    ->getStateUsing(fn (User $record) => $record->profile?->first_name ?? '—')
+                    ->searchable(query: function ($query, string $search) {
+                        return $query->whereHas('profile', fn ($q) => $q->where('first_name', 'ilike', "%{$search}%"));
+                    }),
 
-                Tables\Columns\TextColumn::make('profile.last_name')
+                Tables\Columns\TextColumn::make('last_name')
                     ->label('Фамилия')
-                    ->searchable()
-                    ->default('—'),
+                    ->getStateUsing(fn (User $record) => $record->profile?->last_name ?? '—')
+                    ->searchable(query: function ($query, string $search) {
+                        return $query->whereHas('profile', fn ($q) => $q->where('last_name', 'ilike', "%{$search}%"));
+                    }),
 
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Телефон')
@@ -128,14 +132,14 @@ class UserResource extends Resource
                         default => 'gray',
                     }),
 
-                Tables\Columns\TextColumn::make('profile.city')
+                Tables\Columns\TextColumn::make('city')
                     ->label('Город')
-                    ->default('—'),
+                    ->getStateUsing(fn (User $record) => $record->profile?->city ?? '—'),
 
-                Tables\Columns\TextColumn::make('profile.balance_coins')
+                Tables\Columns\TextColumn::make('balance_coins')
                     ->label('Монеты')
-                    ->sortable()
-                    ->default(0),
+                    ->getStateUsing(fn (User $record) => $record->profile?->balance_coins ?? 0)
+                    ->sortable(),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Регистрация')
@@ -157,20 +161,19 @@ class UserResource extends Resource
                     ])
                     ->action(function (User $record, array $data) {
                         \Illuminate\Support\Facades\DB::transaction(function () use ($record, $data) {
-                            $profile = \App\Models\Profile::where('user_id', $record->id)
-                                ->lockForUpdate()
-                                ->first();
+                            $profile = Profile::firstOrCreate(
+                                ['user_id' => $record->id],
+                                ['first_name' => 'Пользователь', 'last_name' => '', 'city' => 'Алматы', 'balance_coins' => 0]
+                            );
 
-                            if ($profile) {
-                                $amount = (int) $data['amount'];
-                                $profile->increment('balance_coins', $amount);
+                            $amount = (int) $data['amount'];
+                            $profile->increment('balance_coins', $amount);
 
-                                \App\Models\CoinTransaction::create([
-                                    'user_id' => $record->id,
-                                    'type' => \App\Enums\CoinTransactionType::DEPOSIT,
-                                    'amount' => $amount,
-                                ]);
-                            }
+                            \App\Models\CoinTransaction::create([
+                                'user_id' => $record->id,
+                                'type' => \App\Enums\CoinTransactionType::DEPOSIT,
+                                'amount' => $amount,
+                            ]);
                         });
                     }),
 
