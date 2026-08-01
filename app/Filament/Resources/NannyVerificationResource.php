@@ -13,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\NannyVerificationResource\Pages;
 
 class NannyVerificationResource extends Resource
 {
