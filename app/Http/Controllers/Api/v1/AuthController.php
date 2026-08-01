@@ -175,7 +175,7 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token,
-            'user' => $user->load('profile'),
+            'user' => $user->load(['profile', 'coinTransactions', 'profile.documents']),
         ]);
     }
 
@@ -256,7 +256,7 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token,
-            'user' => $user->load('profile'),
+            'user' => $user->load(['profile', 'coinTransactions', 'profile.documents']),
         ]);
     }
 
@@ -275,8 +275,11 @@ class AuthController extends Controller
             'iin' => ['nullable', 'string', 'regex:/^[0-9]{12}$/'],
             'avatar_url' => ['nullable', 'string'],
             'bio' => ['nullable', 'string'],
+            'bio_kk' => ['nullable', 'string'],
             'hourly_rate' => ['nullable', 'integer', 'min:0'],
             'experience_years' => ['nullable', 'integer', 'min:0'],
+            'languages' => ['nullable', 'array'],
+            'skills' => ['nullable', 'array'],
             'latitude' => ['nullable', 'numeric', 'between:-90.0,90.0'],
             'longitude' => ['nullable', 'numeric', 'between:-180.0,180.0'],
             'is_active' => ['nullable', 'boolean'],
@@ -325,6 +328,13 @@ class AuthController extends Controller
         $profile->hourly_rate = $request->input('hourly_rate', $profile->hourly_rate ?? 0);
         $profile->experience_years = $request->input('experience_years', $profile->experience_years ?? 0);
         
+        if ($request->has('languages')) {
+            $profile->languages = $request->input('languages');
+        }
+        if ($request->has('skills')) {
+            $profile->skills = $request->input('skills');
+        }
+
         if ($request->has('latitude') && $request->has('longitude')) {
             $profile->latitude = $request->input('latitude');
             $profile->longitude = $request->input('longitude');
@@ -334,7 +344,7 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'user' => $user->fresh()->load('profile'),
+            'user' => $user->fresh()->load(['profile', 'coinTransactions', 'profile.documents']),
         ]);
     }
 

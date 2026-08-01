@@ -37,7 +37,8 @@ RUN cp .env.example .env
 COPY ./docker/nginx.conf /etc/nginx/sites-available/default
 
 # Create required storage directories
-RUN mkdir -p storage/logs \
+RUN mkdir -p storage/app/public/documents \
+    storage/logs \
     storage/framework/cache/data \
     storage/framework/sessions \
     storage/framework/views \
@@ -45,10 +46,10 @@ RUN mkdir -p storage/logs \
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+    && chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Create startup script
-RUN printf '#!/bin/bash\nphp artisan config:clear\nphp artisan migrate --force\nphp artisan db:seed --force\nphp-fpm -D\nnginx -g "daemon off;"\n' > /start.sh && chmod +x /start.sh
+RUN printf '#!/bin/bash\nphp artisan config:clear\nphp artisan storage:link || true\nphp artisan migrate --force\nphp artisan db:seed --force\nphp-fpm -D\nnginx -g "daemon off;"\n' > /start.sh && chmod +x /start.sh
 
 EXPOSE 80
 
