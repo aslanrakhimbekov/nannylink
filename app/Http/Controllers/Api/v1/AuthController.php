@@ -9,7 +9,7 @@ use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Enums\UserLanguage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\RateLimiter;
@@ -75,9 +75,8 @@ class AuthController extends Controller
         // Generate a 4-digit code
         $otp = (string) rand(1000, 9999);
 
-        // Save in Redis (TTL 5 mins = 300s)
-        Redis::select(15);
-        Redis::set("otp:{$phone}", $otp, 'EX', 300);
+        // Save OTP in cache (TTL 5 mins)
+        Cache::put("otp:{$phone}", $otp, 300);
 
         // Log for local testing
         Log::info("OTP for {$phone}: {$otp}");
@@ -128,8 +127,7 @@ class AuthController extends Controller
         $phone = $request->input('phone');
         $code = $request->input('code');
 
-        Redis::select(15);
-        $cachedCode = Redis::get("otp:{$phone}");
+        $cachedCode = Cache::get("otp:{$phone}");
 
         $isDemoCode = ($code === '1111');
         if (!$isDemoCode && (!$cachedCode || $cachedCode !== $code)) {
@@ -142,7 +140,7 @@ class AuthController extends Controller
         }
 
         // Delete code on success
-        Redis::del("otp:{$phone}");
+        Cache::forget("otp:{$phone}");
 
         // Find or create User
         $user = User::firstOrCreate(

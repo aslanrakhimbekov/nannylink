@@ -40,6 +40,8 @@ services:
           property: password
       - key: TELEGRAM_BOT_TOKEN
         value: "8011733085:AAEEKO9N5YzPS6SH79jjgfFqmRx2GJmSe5E"
+      - key: CACHE_STORE
+        value: database
 
   # 2. Frontend Static Site (React Vite)
   - type: web
