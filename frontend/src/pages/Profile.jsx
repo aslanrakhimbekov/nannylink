@@ -30,6 +30,7 @@ const CITIES = [
 export default function Profile() {
   const { t, i18n } = useTranslation();
   const { user, updateUser, logout } = useAuth();
+  const [loading, setLoading] = useState(false);
 
   const [firstName, setFirstName] = useState(user?.profile?.first_name || '');
   const [lastName, setLastName] = useState(user?.profile?.last_name || '');

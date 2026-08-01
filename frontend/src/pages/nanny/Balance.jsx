@@ -13,10 +13,18 @@ export default function Balance() {
   const { t } = useTranslation();
   const { user, updateUser } = useAuth();
 
-  const balance = user?.profile?.balance_coins || 0;
   const rawTransactions = user?.coin_transactions || [];
   
   const transactions = [...rawTransactions];
+
+  const totalFromTx = transactions.reduce((acc, tx) => {
+    if (tx.type === 'deposit' || tx.type === 'refund') return acc + (parseInt(tx.amount) || 0);
+    if (tx.type === 'spend') return acc - (parseInt(tx.amount) || 0);
+    return acc;
+  }, 0);
+
+  const balance = Math.max(user?.profile?.balance_coins || 0, totalFromTx);
+
   if (transactions.length === 0 && balance > 0) {
     transactions.push({
       id: 'initial_deposit',

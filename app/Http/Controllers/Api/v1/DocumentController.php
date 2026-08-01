@@ -26,12 +26,12 @@ class DocumentController extends Controller
 
         $validator = Validator::make($request->all(), [
             'type' => ['required', 'string', 'in:criminal_record,medical_clearance,identity_card,narcology_clearance,psychiatry_clearance'],
-            'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'], // Max 5MB
+            'file' => ['required', 'file', 'max:10240'], // Max 10MB
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'The given data was invalid.',
+                'message' => 'Ошибка валидации файла.',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -46,6 +46,7 @@ class DocumentController extends Controller
         try {
             // Upload file
             $diskName = config('filesystems.default', 'public');
+            Storage::disk($diskName)->makeDirectory('documents');
             $path = $request->file('file')->store('documents', $diskName);
 
             $type = $request->input('type');

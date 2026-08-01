@@ -65,9 +65,9 @@ export default function Onboarding() {
       
       // Route based on finalized onboarding role selection
       if (selectedRole === 'parent') {
-        navigate('/parent/orders');
+        navigate('/parent/search');
       } else {
-        navigate('/nanny/search');
+        navigate('/nanny/schedule');
       }
     } catch (err) {
       showToast('error', err.message || 'Ошибка обновления профиля');
