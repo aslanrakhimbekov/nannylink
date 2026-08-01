@@ -49,7 +49,7 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
     && chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Create startup script
-RUN printf '#!/bin/bash\nphp artisan config:clear\nphp artisan storage:link || true\nphp artisan migrate --force\nphp artisan db:seed --force\nphp-fpm -D\nnginx -g "daemon off;"\n' > /start.sh && chmod +x /start.sh
+RUN printf '#!/bin/bash\nphp artisan config:clear\nphp artisan storage:link || true\nphp artisan filament:upgrade --no-interaction || true\nphp artisan migrate --force\nphp artisan db:seed --force\nphp-fpm -D\nnginx -g "daemon off;"\n' > /start.sh && chmod +x /start.sh
 
 EXPOSE 80
 

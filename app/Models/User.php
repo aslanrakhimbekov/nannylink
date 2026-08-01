@@ -27,7 +27,8 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return in_array($this->role->value, ['admin', 'moderator']);
+        $roleVal = is_object($this->role) ? $this->role->value : (string) $this->role;
+        return in_array($roleVal, ['admin', 'moderator']);
     }
 
     protected $fillable = [
