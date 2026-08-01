@@ -22,7 +22,7 @@ class Login extends BaseLogin
         }
 
         $this->form->fill([
-            'login' => 'aslan.rakhimbekov@gmail.com',
+            'email' => 'aslan.rakhimbekov@gmail.com',
             'password' => '',
         ]);
     }
@@ -31,8 +31,9 @@ class Login extends BaseLogin
     {
         return $form
             ->schema([
-                TextInput::make('login')
-                    ->label('Email или телефон администратора')
+                TextInput::make('email')
+                    ->label('Email администратора')
+                    ->email()
                     ->placeholder('aslan.rakhimbekov@gmail.com')
                     ->required()
                     ->autofocus(),
@@ -55,28 +56,20 @@ class Login extends BaseLogin
 
         $data = $this->form->getState();
 
-        $loginInput = trim($data['login'] ?? '');
+        $email = trim(strtolower($data['email'] ?? ''));
         $password = $data['password'] ?? '';
 
-        $cleanPhone = '+' . preg_replace('/[^0-9]/', '', $loginInput);
-
-        $user = User::where('email', $loginInput)
-            ->orWhere('phone', $loginInput)
-            ->orWhere('phone', $cleanPhone)
-            ->first();
+        $user = User::where('email', $email)->first();
 
         $roleVal = is_object($user?->role) ? $user->role->value : (string) $user?->role;
 
         if (!$user || !in_array($roleVal, ['admin', 'moderator'])) {
             throw ValidationException::withMessages([
-                'data.login' => 'Пользователь не найден или у вас нет прав администратора.',
+                'data.email' => 'Администратор с таким Email не найден или недостаточно прав.',
             ]);
         }
 
-        $isPasswordValid = $user->password && Hash::check($password, $user->password);
-        $isCodeValid = ($password === '1111');
-
-        if (!$isPasswordValid && !$isCodeValid) {
+        if (!$user->password || !Hash::check($password, $user->password)) {
             throw ValidationException::withMessages([
                 'data.password' => 'Неверный пароль.',
             ]);
