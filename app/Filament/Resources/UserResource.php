@@ -143,7 +143,7 @@ class UserResource extends Resource
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Регистрация')
-                    ->dateTime('d.m.Y H:i')
+                    ->getStateUsing(fn (User $record) => $record->created_at ? $record->created_at->format('d.m.Y H:i') : '—')
                     ->sortable(),
             ])
             ->actions([
