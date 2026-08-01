@@ -46,10 +46,7 @@ services:
     staticPublishPath: ./frontend/dist
     envVars:
       - key: VITE_API_BASE_URL
-        fromService:
-          type: web
-          name: nannylink-backend
-          property: url
+        value: https://nannylink-backend.onrender.com
 
 databases:
   # 3. PostgreSQL Database
