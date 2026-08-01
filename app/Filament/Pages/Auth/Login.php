@@ -4,6 +4,7 @@ namespace App\Filament\Pages\Auth;
 
 use Filament\Pages\Auth\Login as BaseLogin;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -40,6 +41,11 @@ class Login extends BaseLogin
                 TextInput::make('password')
                     ->label('Пароль')
                     ->password()
+                    ->hintAction(
+                        Action::make('forgotPassword')
+                            ->label('Забыли пароль?')
+                            ->url(fn () => filament()->getRequestPasswordResetUrl())
+                    )
                     ->required(),
             ])
             ->statePath('data');
@@ -76,8 +82,6 @@ class Login extends BaseLogin
         }
 
         Auth::login($user, true);
-
-        session()->regenerate();
 
         return app(\Filament\Http\Responses\Auth\Contracts\LoginResponse::class);
     }
