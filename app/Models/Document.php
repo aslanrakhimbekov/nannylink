@@ -36,7 +36,11 @@ class Document extends Model
         parent::boot();
 
         static::created(function ($document) {
-            \App\Jobs\ProcessDocumentJob::dispatch($document);
+            try {
+                \App\Jobs\ProcessDocumentJob::dispatch($document);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("ProcessDocumentJob dispatch error: " . $e->getMessage());
+            }
         });
 
         static::updated(function ($document) {
