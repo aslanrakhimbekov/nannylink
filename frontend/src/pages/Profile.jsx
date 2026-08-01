@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
 import { profileApi } from '../api/profile';
@@ -40,7 +40,51 @@ export default function Profile() {
   const [bioKk, setBioKk] = useState(user?.profile?.bio_kk || '');
   const [hourlyRate, setHourlyRate] = useState(user?.profile?.hourly_rate || '');
   const [experienceYears, setExperienceYears] = useState(user?.profile?.experience_years || '');
-  const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleAvatarFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('error', 'Пожалуйста, выберите изображение');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 250;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height = Math.round((height * MAX_SIZE) / width);
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width = Math.round((width * MAX_SIZE) / height);
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        setAvatarUrl(compressedDataUrl);
+        showToast('success', 'Фото сжато и загружено!');
+      };
+    };
+    reader.readAsDataURL(file);
+  };
 
   const [latitude, setLatitude] = useState(user?.profile?.latitude || null);
   const [longitude, setLongitude] = useState(user?.profile?.longitude || null);
@@ -141,21 +185,57 @@ export default function Profile() {
         <form onSubmit={handleSave} className={styles.form}>
           <Card>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
-              <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'linear-gradient(135deg, #FF7A59 0%, #FF5252 100%)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.5rem', overflow: 'hidden', flexShrink: 0, boxShadow: '0 4px 12px rgba(255, 122, 89, 0.3)' }}>
+              <div 
+                onClick={() => user?.role === 'nanny' && fileInputRef.current?.click()}
+                style={{ 
+                  width: '72px', 
+                  height: '72px', 
+                  borderRadius: '50%', 
+                  background: 'linear-gradient(135deg, #FF7A59 0%, #FF5252 100%)', 
+                  color: '#fff', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  fontWeight: 'bold', 
+                  fontSize: '1.6rem', 
+                  overflow: 'hidden', 
+                  flexShrink: 0, 
+                  boxShadow: '0 4px 12px rgba(255, 122, 89, 0.3)',
+                  cursor: user?.role === 'nanny' ? 'pointer' : 'default',
+                }}
+              >
                 {avatarUrl ? (
                   <img src={avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
-                  firstName?.[0] || 'П'
+                  firstName?.[0] || 'Н'
                 )}
               </div>
               {user?.role === 'nanny' && (
-                <div style={{ flex: 1 }}>
-                  <Input
-                    label="URL фотографии / аватара"
-                    value={avatarUrl}
-                    onChange={(e) => setAvatarUrl(e.target.value)}
-                    placeholder="https://..."
+                <div>
+                  <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    accept="image/*" 
+                    onChange={handleAvatarFile} 
+                    style={{ display: 'none' }} 
                   />
+                  <Button 
+                    type="button" 
+                    variant="secondary" 
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{ fontSize: '0.85rem', padding: '8px 16px', borderRadius: '10px' }}
+                  >
+                    📷 Загрузить фото
+                  </Button>
+                  {avatarUrl && (
+                    <button 
+                      type="button" 
+                      onClick={() => setAvatarUrl('')} 
+                      style={{ display: 'block', marginTop: '6px', fontSize: '0.75rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                    >
+                      Удалить фото
+                    </button>
+                  )}
                 </div>
               )}
             </div>
