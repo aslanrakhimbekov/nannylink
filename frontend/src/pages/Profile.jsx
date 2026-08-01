@@ -145,17 +145,19 @@ export default function Profile() {
                 {avatarUrl ? (
                   <img src={avatarUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
-                  firstName?.[0] || 'Н'
+                  firstName?.[0] || 'П'
                 )}
               </div>
-              <div style={{ flex: 1 }}>
-                <Input
-                  label="URL фотографии / аватара"
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  placeholder="https://..."
-                />
-              </div>
+              {user?.role === 'nanny' && (
+                <div style={{ flex: 1 }}>
+                  <Input
+                    label="URL фотографии / аватара"
+                    value={avatarUrl}
+                    onChange={(e) => setAvatarUrl(e.target.value)}
+                    placeholder="https://..."
+                  />
+                </div>
+              )}
             </div>
 
             <Input
@@ -199,31 +201,32 @@ export default function Profile() {
             </div>
 
             {user?.role === 'nanny' && (
-              <Input
-                label={t('profile.iin')}
-                value={iin}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '').slice(0, 12);
-                  setIin(val);
-                }}
-                placeholder="123456789012"
-              />
+              <>
+                <Input
+                  label={t('profile.iin')}
+                  value={iin}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 12);
+                    setIin(val);
+                  }}
+                  placeholder="123456789012"
+                />
+                <Input
+                  label={t('profile.bio_ru')}
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  multiline
+                  rows={3}
+                />
+                <Input
+                  label={t('profile.bio_kk')}
+                  value={bioKk}
+                  onChange={(e) => setBioKk(e.target.value)}
+                  multiline
+                  rows={3}
+                />
+              </>
             )}
-
-            <Input
-              label={t('profile.bio_ru')}
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              multiline
-              rows={3}
-            />
-            <Input
-              label={t('profile.bio_kk')}
-              value={bioKk}
-              onChange={(e) => setBioKk(e.target.value)}
-              multiline
-              rows={3}
-            />
 
             {user?.role === 'nanny' && (
               <>
