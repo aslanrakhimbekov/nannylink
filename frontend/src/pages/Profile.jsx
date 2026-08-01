@@ -174,6 +174,16 @@ export default function Profile() {
     }
   };
 
+  if (!user) {
+    return (
+      <PageTransition>
+        <div className={styles.container} style={{ padding: '3rem 1rem', textAlign: 'center' }}>
+          <div>{t('common.loading')}</div>
+        </div>
+      </PageTransition>
+    );
+  }
+
   return (
     <PageTransition>
       <div className={styles.container}>
@@ -183,8 +193,8 @@ export default function Profile() {
         </div>
 
         {user?.role === 'nanny' && (
-          <div className={`${styles.statusCard} ${user.profile?.is_verified ? styles.verified : styles.unverified} glass`}>
-            {user.profile?.is_verified ? (
+          <div className={`${styles.statusCard} ${user?.profile?.is_verified ? styles.verified : styles.unverified} glass`}>
+            {user?.profile?.is_verified ? (
               <>
                 <ShieldCheck size={28} className={styles.verifiedIcon} />
                 <div>

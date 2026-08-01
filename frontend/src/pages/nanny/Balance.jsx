@@ -14,7 +14,18 @@ export default function Balance() {
   const { user, updateUser } = useAuth();
 
   const balance = user?.profile?.balance_coins || 0;
-  const transactions = user?.coin_transactions || [];
+  const rawTransactions = user?.coin_transactions || [];
+  
+  const transactions = [...rawTransactions];
+  if (transactions.length === 0 && balance > 0) {
+    transactions.push({
+      id: 'initial_deposit',
+      type: 'deposit',
+      amount: balance,
+      created_at: user?.created_at || new Date().toISOString(),
+      isInitial: true,
+    });
+  }
 
   const [depositAmount, setDepositAmount] = useState(1000);
   const [depositing, setDepositing] = useState(false);
@@ -52,13 +63,14 @@ export default function Balance() {
 
   const numResponses = Math.floor(balance / 500);
 
-  const getTxTypeLabel = (type) => {
+  const getTxTypeLabel = (tx) => {
+    if (tx.isInitial) return 'Стартовый баланс';
     const labels = {
       spend: t('balance.type_spend'),
       refund: t('balance.type_refund'),
       deposit: t('balance.type_deposit'),
     };
-    return labels[type] || type;
+    return labels[tx.type] || tx.type;
   };
 
   return (
@@ -133,7 +145,7 @@ export default function Balance() {
                         {tx.type === 'refund' && <RotateCcw size={16} />}
                       </div>
                       <div>
-                        <h4>{getTxTypeLabel(tx.type)}</h4>
+                        <h4>{getTxTypeLabel(tx)}</h4>
                         <span className={styles.date}>
                           {new Date(tx.created_at).toLocaleDateString()}
                         </span>

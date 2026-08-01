@@ -43,44 +43,59 @@ class DocumentController extends Controller
             ], 404);
         }
 
-        // Upload file
-        $diskName = config('filesystems.default', 'public');
-        $path = $request->file('file')->store('documents', $diskName);
+        try {
+            // Upload file
+            $diskName = config('filesystems.default', 'public');
+            $path = $request->file('file')->store('documents', $diskName);
 
-        $type = $request->input('type');
+            $type = $request->input('type');
 
-        // Check if document of this type already exists for this profile
-        $existing = Document::where('profile_id', $profile->id)->where('type', $type)->first();
+            // Check if document of this type already exists for this profile
+            $existing = Document::where('profile_id', $profile->id)->where('type', $type)->first();
 
-        if ($existing) {
-            // Delete old file if present
-            if ($existing->file_path) {
-                Storage::disk($diskName)->delete($existing->file_path);
+            if ($existing) {
+                // Delete old file if present
+                if ($existing->file_path) {
+                    try {
+                        Storage::disk($diskName)->delete($existing->file_path);
+                    } catch (\Throwable $e) {
+                        Log::warning("Failed to delete old doc file: " . $e->getMessage());
+                    }
+                }
+                $existing->update([
+                    'file_path' => $path,
+                    'status' => DocumentStatus::PENDING,
+                    'rejection_reason' => null,
+                    'verified_at' => null,
+                    'verified_by_user_id' => null,
+                ]);
+                $document = $existing->fresh();
+            } else {
+                $document = Document::create([
+                    'profile_id' => $profile->id,
+                    'type' => $type,
+                    'file_path' => $path,
+                    'status' => DocumentStatus::PENDING,
+                ]);
             }
-            $existing->update([
-                'file_path' => $path,
-                'status' => DocumentStatus::PENDING,
-                'rejection_reason' => null,
-                'verified_at' => null,
-                'verified_by_user_id' => null,
-            ]);
-            $document = $existing->fresh();
-        } else {
-            $document = Document::create([
-                'profile_id' => $profile->id,
-                'type' => $type,
-                'file_path' => $path,
-                'status' => DocumentStatus::PENDING,
-            ]);
+
+            // Reset profile verification when a document is uploaded/re-uploaded
+            $profile->update(['is_verified' => false]);
+
+            // Dispatch background processing job safely
+            try {
+                ProcessDocumentJob::dispatch($document);
+            } catch (\Throwable $e) {
+                Log::warning("ProcessDocumentJob dispatch warning: " . $e->getMessage());
+            }
+
+            return response()->json($document, 201);
+        } catch (\Throwable $e) {
+            Log::error("Document store error: " . $e->getMessage());
+            return response()->json([
+                'message' => 'Ошибка при сохранении документа: ' . $e->getMessage(),
+            ], 500);
         }
-
-        // Reset profile verification when a document is uploaded/re-uploaded
-        $profile->update(['is_verified' => false]);
-
-        // Dispatch background processing job
-        ProcessDocumentJob::dispatch($document);
-
-        return response()->json($document, 201);
     }
 
     public function destroy(Request $request, $id)
