@@ -279,6 +279,7 @@ class AuthController extends Controller
             'experience_years' => ['nullable', 'integer', 'min:0'],
             'latitude' => ['nullable', 'numeric', 'between:-90.0,90.0'],
             'longitude' => ['nullable', 'numeric', 'between:-180.0,180.0'],
+            'is_active' => ['nullable', 'boolean'],
         ]);
 
         if ($validator->fails()) {
@@ -294,6 +295,20 @@ class AuthController extends Controller
 
         $profile = $user->profile ?: new Profile();
         $profile->user_id = $user->id;
+
+        if ($request->has('is_active')) {
+            $wantActive = $request->boolean('is_active');
+            if ($wantActive && !$profile->is_verified) {
+                return response()->json([
+                    'message' => 'The given data was invalid.',
+                    'errors' => [
+                        'is_active' => ['Для включения показа профиля необходимо пройти верификацию всех документов.']
+                    ]
+                ], 422);
+            }
+            $profile->is_active = $wantActive;
+        }
+
         $profile->first_name = $request->input('first_name', $profile->first_name ?? '');
         $profile->last_name = $request->input('last_name', $profile->last_name ?? '');
         $profile->city = $request->input('city', $profile->city ?? 'Алматы');

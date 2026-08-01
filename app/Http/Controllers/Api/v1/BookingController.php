@@ -38,6 +38,7 @@ class BookingController extends Controller
 
         $query = Profile::nearby($latitude, $longitude, $radiusKm)
             ->where('is_verified', true)
+            ->where('is_active', true)
             ->with('user');
 
         if ($request->has('max_hourly_rate') && $request->input('max_hourly_rate')) {

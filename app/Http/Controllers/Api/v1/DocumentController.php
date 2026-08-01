@@ -25,8 +25,8 @@ class DocumentController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'type' => ['required', 'string', 'in:criminal_record,medical_clearance'],
-            'file' => ['required', 'file', 'mimes:pdf', 'max:2048'], // PDF files, max 2MB
+            'type' => ['required', 'string', 'in:criminal_record,medical_clearance,identity_card,narcology_clearance,psychiatry_clearance'],
+            'file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'], // Max 5MB
         ]);
 
         if ($validator->fails()) {
@@ -43,15 +43,38 @@ class DocumentController extends Controller
             ], 404);
         }
 
-        // Upload to S3 (in local testing, Storage::fake('s3') is used)
+        // Upload file
         $path = $request->file('file')->store('documents', 's3');
 
-        $document = Document::create([
-            'profile_id' => $profile->id,
-            'type' => $request->input('type'),
-            'file_path' => $path,
-            'status' => DocumentStatus::PENDING,
-        ]);
+        $type = $request->input('type');
+
+        // Check if document of this type already exists for this profile
+        $existing = Document::where('profile_id', $profile->id)->where('type', $type)->first();
+
+        if ($existing) {
+            // Delete old file if present
+            if ($existing->file_path) {
+                Storage::disk('s3')->delete($existing->file_path);
+            }
+            $existing->update([
+                'file_path' => $path,
+                'status' => DocumentStatus::PENDING,
+                'rejection_reason' => null,
+                'verified_at' => null,
+                'verified_by_user_id' => null,
+            ]);
+            $document = $existing->fresh();
+        } else {
+            $document = Document::create([
+                'profile_id' => $profile->id,
+                'type' => $type,
+                'file_path' => $path,
+                'status' => DocumentStatus::PENDING,
+            ]);
+        }
+
+        // Reset profile verification when a document is uploaded/re-uploaded
+        $profile->update(['is_verified' => false]);
 
         // Dispatch background processing job
         ProcessDocumentJob::dispatch($document);

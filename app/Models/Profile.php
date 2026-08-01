@@ -28,6 +28,7 @@ class Profile extends Model
         'experience_years',
         'balance_coins',
         'is_verified',
+        'is_active',
         'location',
         'latitude',
         'longitude',
@@ -37,6 +38,7 @@ class Profile extends Model
         'languages' => 'array',
         'skills' => 'array',
         'is_verified' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     protected $appends = [

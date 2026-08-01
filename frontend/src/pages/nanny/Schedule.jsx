@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../context/AuthContext';
+import { profileApi } from '../../api/profile';
 import { slotsApi } from '../../api/slots';
+import { showToast } from '../../components/common/Toast';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import MiniCalendar from '../../components/calendar/MiniCalendar';
@@ -9,6 +12,9 @@ import styles from './Schedule.module.css';
 
 export default function Schedule() {
   const { t } = useTranslation();
+  const { user, updateUser } = useAuth();
+  const [isActive, setIsActive] = useState(user?.profile?.is_active ?? true);
+
   const [slots, setSlots] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [startTime, setStartTime] = useState('09:00');
@@ -16,6 +22,21 @@ export default function Schedule() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const handleToggleActive = async (newVal) => {
+    if (!user?.profile?.is_verified && newVal) {
+      showToast('error', 'Для включения показа пройдите верификацию всех 5 документов');
+      return;
+    }
+    try {
+      const res = await profileApi.updateProfile({ is_active: newVal });
+      updateUser(res.user);
+      setIsActive(newVal);
+      showToast('success', newVal ? 'Профиль и график видны на карте!' : 'Профиль и график скрыты от родителей.');
+    } catch (err) {
+      showToast('error', err.message || 'Ошибка обновления статуса');
+    }
+  };
 
   const timeOptions = useMemo(() => {
     const times = [];
@@ -135,6 +156,42 @@ export default function Schedule() {
       <Card className={styles.scheduleCard}>
         <h2>{t('schedule.title')}</h2>
         <p className={styles.subtitle}>Выберите дату на календаре и добавьте свободные часы</p>
+
+        {/* Profile Visibility & Work Switch */}
+        <div style={{ padding: '16px 20px', borderRadius: '16px', background: isActive && user?.profile?.is_verified ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)', border: '1px solid ' + (isActive && user?.profile?.is_verified ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)'), margin: '16px 0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <strong style={{ fontSize: '0.95rem', color: 'var(--color-text-primary)', display: 'block' }}>
+              {isActive && user?.profile?.is_verified ? '🟢 Профиль активен (Виден на карте)' : '🔴 Профиль скрыт'}
+            </strong>
+            <span style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', display: 'block', marginTop: '2px' }}>
+              {!user?.profile?.is_verified
+                ? '⚠️ Для включения требуется верификация всех 5 документов'
+                : isActive 
+                ? 'Ваш график и профиль видны родителям на карте' 
+                : 'Вы временно скрыли профиль от родителей (например, заболели)'}
+            </span>
+          </div>
+
+          <label style={{ position: 'relative', display: 'inline-block', width: '52px', height: '28px', cursor: user?.profile?.is_verified ? 'pointer' : 'not-allowed', flexShrink: 0 }}>
+            <input 
+              type="checkbox" 
+              checked={isActive && !!user?.profile?.is_verified} 
+              disabled={!user?.profile?.is_verified}
+              onChange={(e) => handleToggleActive(e.target.checked)}
+              style={{ opacity: 0, width: 0, height: 0 }}
+            />
+            <span style={{
+              position: 'absolute', cursor: user?.profile?.is_verified ? 'pointer' : 'not-allowed', top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: isActive && user?.profile?.is_verified ? '#10B981' : '#CBD5E1',
+              transition: '.3s', borderRadius: '34px'
+            }}>
+              <span style={{
+                position: 'absolute', content: '""', height: '20px', width: '20px', left: isActive && user?.profile?.is_verified ? '26px' : '4px', bottom: '4px',
+                backgroundColor: 'white', transition: '.3s', borderRadius: '50%', boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+              }} />
+            </span>
+          </label>
+        </div>
 
         <MiniCalendar
           value={selectedDate}
