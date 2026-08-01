@@ -77,10 +77,22 @@ class UserResource extends Resource
                             ->required(),
                     ])
                     ->action(function (User $record, array $data) {
-                        $profile = $record->profile;
-                        if ($profile) {
-                            $profile->increment('balance_coins', (int) $data['amount']);
-                        }
+                        \Illuminate\Support\Facades\DB::transaction(function () use ($record, $data) {
+                            $profile = \App\Models\Profile::where('user_id', $record->id)
+                                ->lockForUpdate()
+                                ->first();
+
+                            if ($profile) {
+                                $amount = (int) $data['amount'];
+                                $profile->increment('balance_coins', $amount);
+
+                                \App\Models\CoinTransaction::create([
+                                    'user_id' => $record->id,
+                                    'type' => \App\Enums\CoinTransactionType::DEPOSIT,
+                                    'amount' => $amount,
+                                ]);
+                            }
+                        });
                     }),
                 Tables\Actions\Action::make('block')
                     ->label('Заблокировать')

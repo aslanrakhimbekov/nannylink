@@ -103,19 +103,41 @@ export default function Profile() {
     }
   }, [latitude, longitude]);
 
-  const [languages, setLanguages] = useState(user?.profile?.languages || ['ru']);
-  const [skills, setSkills] = useState(user?.profile?.skills || []);
+  const [languages, setLanguages] = useState(
+    Array.isArray(user?.profile?.languages) ? user.profile.languages : ['ru']
+  );
+  const [skills, setSkills] = useState(
+    Array.isArray(user?.profile?.skills) ? user.profile.skills : []
+  );
+
+  useEffect(() => {
+    if (user?.profile) {
+      setFirstName(user.profile.first_name || '');
+      setLastName(user.profile.last_name || '');
+      setCity(user.profile.city || 'Алматы');
+      setIin(user.profile.iin || '');
+      setAvatarUrl(user.profile.avatar_url || '');
+      setBio(user.profile.bio || '');
+      setBioKk(user.profile.bio_kk || '');
+      setHourlyRate(user.profile.hourly_rate || '');
+      setExperienceYears(user.profile.experience_years || '');
+      setLanguages(Array.isArray(user.profile.languages) ? user.profile.languages : ['ru']);
+      setSkills(Array.isArray(user.profile.skills) ? user.profile.skills : []);
+    }
+  }, [user]);
 
   const toggleLang = (code) => {
-    setLanguages((prev) => 
-      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
-    );
+    setLanguages((prev) => {
+      const list = Array.isArray(prev) ? prev : [];
+      return list.includes(code) ? list.filter((c) => c !== code) : [...list, code];
+    });
   };
 
   const toggleSkill = (code) => {
-    setSkills((prev) => 
-      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
-    );
+    setSkills((prev) => {
+      const list = Array.isArray(prev) ? prev : [];
+      return list.includes(code) ? list.filter((c) => c !== code) : [...list, code];
+    });
   };
 
   const handleSave = async (e) => {
@@ -334,25 +356,28 @@ export default function Profile() {
                       { code: 'kk', label: 'Қазақша' },
                       { code: 'ru', label: 'Русский' },
                       { code: 'en', label: 'English' },
-                    ].map((lang) => (
-                      <button
-                        key={lang.code}
-                        type="button"
-                        onClick={() => toggleLang(lang.code)}
-                        style={{
-                          padding: '0.4rem 0.75rem',
-                          borderRadius: '20px',
-                          fontSize: '0.8rem',
-                          border: '1px solid ' + (languages.includes(lang.code) ? 'var(--color-primary)' : 'var(--color-border)'),
-                          background: languages.includes(lang.code) ? 'rgba(255,122,89,0.15)' : 'var(--color-surface)',
-                          color: languages.includes(lang.code) ? 'var(--color-primary)' : 'var(--color-text)',
-                          fontWeight: languages.includes(lang.code) ? '700' : '500',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {lang.label}
-                      </button>
-                    ))}
+                    ].map((lang) => {
+                      const isSelected = Array.isArray(languages) && languages.includes(lang.code);
+                      return (
+                        <button
+                          key={lang.code}
+                          type="button"
+                          onClick={() => toggleLang(lang.code)}
+                          style={{
+                            padding: '0.4rem 0.75rem',
+                            borderRadius: '20px',
+                            fontSize: '0.8rem',
+                            border: '1px solid ' + (isSelected ? 'var(--color-primary)' : 'var(--color-border)'),
+                            background: isSelected ? 'rgba(255,122,89,0.15)' : 'var(--color-surface)',
+                            color: isSelected ? 'var(--color-primary)' : 'var(--color-text)',
+                            fontWeight: isSelected ? '700' : '500',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {lang.label}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -361,25 +386,28 @@ export default function Profile() {
                     {t('skills.title')}
                   </label>
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                    {['first_aid', 'infants', 'lessons', 'montessori'].map((code) => (
-                      <button
-                        key={code}
-                        type="button"
-                        onClick={() => toggleSkill(code)}
-                        style={{
-                          padding: '0.4rem 0.75rem',
-                          borderRadius: '20px',
-                          fontSize: '0.8rem',
-                          border: '1px solid ' + (skills.includes(code) ? 'var(--color-primary)' : 'var(--color-border)'),
-                          background: skills.includes(code) ? 'rgba(255,122,89,0.15)' : 'var(--color-surface)',
-                          color: skills.includes(code) ? 'var(--color-primary)' : 'var(--color-text)',
-                          fontWeight: skills.includes(code) ? '700' : '500',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {t(`skills.${code}`)}
-                      </button>
-                    ))}
+                    {['first_aid', 'infants', 'lessons', 'montessori'].map((code) => {
+                      const isSelected = Array.isArray(skills) && skills.includes(code);
+                      return (
+                        <button
+                          key={code}
+                          type="button"
+                          onClick={() => toggleSkill(code)}
+                          style={{
+                            padding: '0.4rem 0.75rem',
+                            borderRadius: '20px',
+                            fontSize: '0.8rem',
+                            border: '1px solid ' + (isSelected ? 'var(--color-primary)' : 'var(--color-border)'),
+                            background: isSelected ? 'rgba(255,122,89,0.15)' : 'var(--color-surface)',
+                            color: isSelected ? 'var(--color-primary)' : 'var(--color-text)',
+                            fontWeight: isSelected ? '700' : '500',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {t(`skills.${code}`)}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </>

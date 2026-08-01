@@ -44,7 +44,8 @@ class DocumentController extends Controller
         }
 
         // Upload file
-        $path = $request->file('file')->store('documents', 's3');
+        $diskName = config('filesystems.default', 'public');
+        $path = $request->file('file')->store('documents', $diskName);
 
         $type = $request->input('type');
 
@@ -54,7 +55,7 @@ class DocumentController extends Controller
         if ($existing) {
             // Delete old file if present
             if ($existing->file_path) {
-                Storage::disk('s3')->delete($existing->file_path);
+                Storage::disk($diskName)->delete($existing->file_path);
             }
             $existing->update([
                 'file_path' => $path,

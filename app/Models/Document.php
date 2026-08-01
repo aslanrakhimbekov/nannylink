@@ -50,7 +50,7 @@ class Document extends Model
 
         static::deleted(function ($document) {
             if ($document->file_path) {
-                \Illuminate\Support\Facades\Storage::disk('s3')->delete($document->file_path);
+                \Illuminate\Support\Facades\Storage::disk(config('filesystems.default', 'public'))->delete($document->file_path);
             }
             $profile = $document->profile;
             if ($profile) {
