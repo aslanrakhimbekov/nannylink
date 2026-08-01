@@ -9,63 +9,137 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms;
+use Filament\Forms\Form;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static ?string $navigationLabel = 'Пользователи и Админы';
+    protected static ?string $pluralModelLabel = 'Пользователи и Администраторы';
+    protected static ?string $modelLabel = 'Пользователь';
 
     public static function canViewAny(): bool
     {
         return true;
     }
 
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Section::make('Учетные данные админа / пользователя')
+                    ->schema([
+                        Forms\Components\TextInput::make('email')
+                            ->label('Email (Обязательно для админа)')
+                            ->email()
+                            ->required(fn (Forms\Get $get) => in_array($get('role'), ['admin', 'moderator']))
+                            ->unique(User::class, 'email', ignoreRecord: true)
+                            ->placeholder('admin@nannylink.kz'),
+
+                        Forms\Components\TextInput::make('password')
+                            ->label('Пароль')
+                            ->password()
+                            ->dehydrateStateUsing(fn ($state) => \Illuminate\Support\Facades\Hash::make($state))
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->required(fn (string $operation): bool => $operation === 'create')
+                            ->placeholder('Старые пароли скрыты. Введите новый пароль для изменения.'),
+
+                        Forms\Components\Select::make('role')
+                            ->label('Роль')
+                            ->options([
+                                'admin' => 'Администратор',
+                                'moderator' => 'Модератор',
+                                'nanny' => 'Няня',
+                                'parent' => 'Родитель',
+                            ])
+                            ->default('admin')
+                            ->required(),
+
+                        Forms\Components\TextInput::make('phone')
+                            ->label('Номер телефона (Необязательно для админов)')
+                            ->placeholder('+77014444444')
+                            ->nullable(),
+                    ])->columns(2),
+
+                Forms\Components\Section::make('Персональные данные (ФИО)')
+                    ->schema([
+                        Forms\Components\TextInput::make('first_name')
+                            ->label('Имя')
+                            ->required()
+                            ->placeholder('Иван'),
+
+                        Forms\Components\TextInput::make('last_name')
+                            ->label('Фамилия')
+                            ->required()
+                            ->placeholder('Иванов'),
+
+                        Forms\Components\TextInput::make('city')
+                            ->label('Город')
+                            ->default('Алматы'),
+                    ])->columns(3),
+            ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('phone')
+                Tables\Columns\TextColumn::make('email')
+                    ->label('Email')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->default('—'),
+
                 Tables\Columns\TextColumn::make('profile.first_name')
                     ->label('Имя')
                     ->searchable(),
+
                 Tables\Columns\TextColumn::make('profile.last_name')
                     ->label('Фамилия')
                     ->searchable(),
+
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('Телефон')
+                    ->searchable()
+                    ->default('—'),
+
                 Tables\Columns\TextColumn::make('role')
+                    ->label('Роль')
                     ->badge()
                     ->color(fn ($state): string => match (is_object($state) ? $state->value : (string) $state) {
                         'admin' => 'danger',
+                        'moderator' => 'warning',
                         'nanny' => 'success',
                         'parent' => 'info',
                         default => 'gray',
                     }),
+
                 Tables\Columns\TextColumn::make('status')
+                    ->label('Статус')
                     ->badge()
                     ->color(fn ($state): string => match (is_object($state) ? $state->value : (string) $state) {
                         'active' => 'success',
                         'blocked' => 'danger',
                         default => 'gray',
                     }),
-                Tables\Columns\TextColumn::make('profile.iin')
-                    ->label('ИИН')
-                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('profile.city')
                     ->label('Город'),
-                Tables\Columns\IconColumn::make('profile.is_verified')
-                    ->label('Верифицирован')
-                    ->boolean(),
+
                 Tables\Columns\TextColumn::make('profile.balance_coins')
                     ->label('Монеты')
                     ->sortable(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Регистрация')
                     ->dateTime('d.m.Y H:i')
                     ->sortable(),
             ])
             ->actions([
+                Tables\Actions\EditAction::make(),
+
                 Tables\Actions\Action::make('topup')
                     ->label('Пополнить')
                     ->icon('heroicon-o-plus-circle')
@@ -94,49 +168,45 @@ class UserResource extends Resource
                             }
                         });
                     }),
+
                 Tables\Actions\Action::make('block')
                     ->label('Заблокировать')
                     ->icon('heroicon-o-no-symbol')
                     ->color('danger')
                     ->requiresConfirmation()
                     ->modalHeading('Заблокировать пользователя')
-                    ->modalDescription(fn (User $record) => "Вы уверены, что хотите заблокировать {$record->phone}? Пользователь не сможет войти в систему.")
                     ->form([
                         Forms\Components\Textarea::make('block_reason')
                             ->label('Причина блокировки')
-                            ->required()
-                            ->placeholder('Укажите причину блокировки...'),
+                            ->required(),
                     ])
                     ->action(function (User $record, array $data) {
-                        $record->update([
-                            'status' => UserStatus::BLOCKED,
-                        ]);
-                        // Revoke all tokens so user is logged out immediately
+                        $record->update(['status' => UserStatus::BLOCKED]);
                         $record->tokens()->delete();
                     })
                     ->visible(fn (User $record) => $record->status === UserStatus::ACTIVE),
+
                 Tables\Actions\Action::make('unblock')
                     ->label('Разблокировать')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->modalHeading('Разблокировать пользователя')
-                    ->modalDescription(fn (User $record) => "Разблокировать {$record->phone}? Пользователь сможет снова войти в систему.")
                     ->action(function (User $record) {
-                        $record->update([
-                            'status' => UserStatus::ACTIVE,
-                        ]);
+                        $record->update(['status' => UserStatus::ACTIVE]);
                     })
                     ->visible(fn (User $record) => $record->status === UserStatus::BLOCKED),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('role')
+                    ->label('Фильтр по роли')
                     ->options([
-                        'parent' => 'Родитель',
+                        'admin' => 'Администратор',
+                        'moderator' => 'Модератор',
                         'nanny' => 'Няня',
-                        'admin' => 'Админ',
+                        'parent' => 'Родитель',
                     ]),
                 Tables\Filters\SelectFilter::make('status')
+                    ->label('Фильтр по статусу')
                     ->options([
                         'active' => 'Активный',
                         'blocked' => 'Заблокирован',
@@ -149,6 +219,8 @@ class UserResource extends Resource
     {
         return [
             'index' => Pages\ListUsers::route('/'),
+            'create' => Pages\CreateUser::route('/create'),
+            'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 }
