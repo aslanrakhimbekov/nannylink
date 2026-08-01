@@ -44,7 +44,7 @@ class UserResource extends Resource
                             ->dehydrateStateUsing(fn ($state) => \Illuminate\Support\Facades\Hash::make($state))
                             ->dehydrated(fn ($state) => filled($state))
                             ->required(fn (string $operation): bool => $operation === 'create')
-                            ->placeholder('Старые пароли скрыты. Введите новый пароль для изменения.'),
+                            ->placeholder('Введите новый пароль для изменения'),
 
                         Forms\Components\Select::make('role')
                             ->label('Роль')
@@ -63,7 +63,8 @@ class UserResource extends Resource
                             ->nullable(),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Персональные данные (ФИО)')
+                Forms\Components\Section::make('Персональные данные (Профиль)')
+                    ->relationship('profile')
                     ->schema([
                         Forms\Components\TextInput::make('first_name')
                             ->label('Имя')
@@ -94,11 +95,13 @@ class UserResource extends Resource
 
                 Tables\Columns\TextColumn::make('profile.first_name')
                     ->label('Имя')
-                    ->searchable(),
+                    ->searchable()
+                    ->default('—'),
 
                 Tables\Columns\TextColumn::make('profile.last_name')
                     ->label('Фамилия')
-                    ->searchable(),
+                    ->searchable()
+                    ->default('—'),
 
                 Tables\Columns\TextColumn::make('phone')
                     ->label('Телефон')
@@ -126,11 +129,13 @@ class UserResource extends Resource
                     }),
 
                 Tables\Columns\TextColumn::make('profile.city')
-                    ->label('Город'),
+                    ->label('Город')
+                    ->default('—'),
 
                 Tables\Columns\TextColumn::make('profile.balance_coins')
                     ->label('Монеты')
-                    ->sortable(),
+                    ->sortable()
+                    ->default(0),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Регистрация')
