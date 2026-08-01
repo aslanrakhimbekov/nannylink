@@ -22,13 +22,13 @@ class User extends Authenticatable implements FilamentUser, HasName
 
     public function getFilamentName(): string
     {
-        return $this->phone ?? $this->telegram_username ?? 'User';
+        return $this->profile?->first_name ? trim($this->profile->first_name . ' ' . $this->profile->last_name) : ($this->email ?? $this->phone ?? 'Admin');
     }
 
     public function canAccessPanel(Panel $panel): bool
     {
         $roleVal = is_object($this->role) ? $this->role->value : (string) $this->role;
-        return in_array($roleVal, ['admin', 'moderator']);
+        return in_array(strtolower($roleVal), ['admin', 'moderator']);
     }
 
     protected $fillable = [
