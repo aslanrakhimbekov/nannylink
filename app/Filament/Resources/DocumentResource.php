@@ -61,6 +61,12 @@ class DocumentResource extends Resource
                     ->sortable(),
             ])
             ->actions([
+                Tables\Actions\Action::make('open_file')
+                    ->label('Открыть документ')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->url(fn (Document $record) => asset('storage/' . $record->file_path))
+                    ->openUrlInNewTab(),
                 Tables\Actions\Action::make('approve')
                     ->label('Одобрить')
                     ->icon('heroicon-o-check-circle')
