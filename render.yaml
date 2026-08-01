@@ -5,7 +5,6 @@ services:
     env: docker
     dockerfilePath: Dockerfile
     plan: free
-    region: singapore
     envVars:
       - key: APP_NAME
         value: NannyLink
@@ -43,7 +42,6 @@ services:
     name: nannylink-frontend
     env: static
     plan: free
-    region: singapore
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist
     envVars:
@@ -59,4 +57,3 @@ databases:
     databaseName: nannylink
     user: nannylink_user
     plan: free
-    region: singapore
