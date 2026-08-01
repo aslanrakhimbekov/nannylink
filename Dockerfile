@@ -10,8 +10,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     zip \
     unzip \
-    nginx \
-    supervisor
+    nginx
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -25,20 +24,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy composer files first (for caching)
-COPY composer.json composer.lock ./
-
-# Install PHP packages
-RUN composer install --no-dev --optimize-autoloader --no-scripts
-
-# Copy project files
+# Copy ALL project files
 COPY . .
 
-# Run post-install scripts
-RUN composer dump-autoload --optimize
+# Install PHP packages (ignore platform reqs for build compatibility)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-reqs
 
-# Copy .env.example as .env (env vars from Render override these)
-RUN cp .env.example .env || true
+# Copy .env.example as .env
+RUN cp .env.example .env
 
 # Copy Nginx config
 COPY ./docker/nginx.conf /etc/nginx/sites-available/default
@@ -55,12 +48,7 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Create startup script
-RUN echo '#!/bin/bash\n\
-php artisan config:clear\n\
-php artisan migrate --force\n\
-php artisan db:seed --force\n\
-php-fpm -D\n\
-nginx -g "daemon off;"' > /start.sh && chmod +x /start.sh
+RUN printf '#!/bin/bash\nphp artisan config:clear\nphp artisan migrate --force\nphp artisan db:seed --force\nphp-fpm -D\nnginx -g "daemon off;"\n' > /start.sh && chmod +x /start.sh
 
 EXPOSE 80
 
