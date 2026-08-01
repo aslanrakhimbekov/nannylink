@@ -3,84 +3,81 @@
 namespace App\Filament\Pages\Auth;
 
 use Filament\Pages\Auth\Login as BaseLogin;
-use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 
 class Login extends BaseLogin
 {
-    protected function getForms(): array
+    public ?array $data = [];
+
+    public function mount(): void
     {
-        return [
-            'form' => $this->form(
-                $this->makeForm()
-                    ->schema([
-                        $this->getPhoneFormComponent(),
-                        $this->getCodeFormComponent(),
-                        $this->getRememberFormComponent(),
-                    ])
-                    ->statePath('data'),
-            ),
-        ];
+        if (Auth::check()) {
+            redirect()->intended(filament()->getUrl());
+        }
+
+        $this->form->fill([
+            'phone' => '+77014444444',
+            'code' => '1111',
+        ]);
     }
 
-    protected function getPhoneFormComponent(): Component
+    public function form(Form $form): Form
     {
-        return TextInput::make('phone')
-            ->label('Номер телефона администратора')
-            ->placeholder('+77014444444')
-            ->required()
-            ->autofocus();
-    }
-
-    protected function getCodeFormComponent(): Component
-    {
-        return TextInput::make('code')
-            ->label('Код авторизации (1111)')
-            ->password()
-            ->default('1111')
-            ->required();
+        return $form
+            ->schema([
+                TextInput::make('phone')
+                    ->label('Номер телефона администратора')
+                    ->placeholder('+77014444444')
+                    ->required()
+                    ->autofocus(),
+                TextInput::make('code')
+                    ->label('Код авторизации (1111)')
+                    ->password()
+                    ->required(),
+            ])
+            ->statePath('data');
     }
 
     public function authenticate(): ?\Filament\Http\Responses\Auth\Contracts\LoginResponse
     {
         try {
-            $data = $this->form->getState();
+            $this->rateLimit(5);
+        } catch (TooManyRequestsException $exception) {
+            $this->getRateLimitedNotification($exception)?->send();
+            return null;
+        }
 
-            $phone = trim($data['phone']);
-            if (!str_starts_with($phone, '+')) {
-                $phone = '+' . preg_replace('/[^0-9]/', '', $phone);
-            }
+        $data = $this->form->getState();
 
-            $user = User::where('phone', $phone)->first();
-            $roleVal = is_object($user?->role) ? $user->role->value : (string) $user?->role;
+        $phone = trim($data['phone']);
+        if (!str_starts_with($phone, '+')) {
+            $phone = '+' . preg_replace('/[^0-9]/', '', $phone);
+        }
 
-            if (!$user || !in_array($roleVal, ['admin', 'moderator'])) {
-                throw ValidationException::withMessages([
-                    'data.phone' => 'Пользователь не найден или у вас нет прав администратора.',
-                ]);
-            }
+        $user = User::where('phone', $phone)->first();
+        $roleVal = is_object($user?->role) ? $user->role->value : (string) $user?->role;
 
-            if (($data['code'] ?? '') !== '1111') {
-                throw ValidationException::withMessages([
-                    'data.code' => 'Неверный код (используйте 1111).',
-                ]);
-            }
-
-            Auth::login($user, true);
-
-            session()->regenerate();
-
-            return app(\Filament\Http\Responses\Auth\Contracts\LoginResponse::class);
-        } catch (ValidationException $e) {
-            throw $e;
-        } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error("Filament login exception: " . $e->getMessage());
+        if (!$user || !in_array($roleVal, ['admin', 'moderator'])) {
             throw ValidationException::withMessages([
-                'data.phone' => 'Ошибка входа: ' . $e->getMessage(),
+                'data.phone' => 'Пользователь не найден или у вас нет прав администратора.',
             ]);
         }
+
+        if (($data['code'] ?? '') !== '1111') {
+            throw ValidationException::withMessages([
+                'data.code' => 'Неверный код (используйте 1111).',
+            ]);
+        }
+
+        Auth::login($user, true);
+
+        session()->regenerate();
+
+        return app(\Filament\Http\Responses\Auth\Contracts\LoginResponse::class);
     }
 }
